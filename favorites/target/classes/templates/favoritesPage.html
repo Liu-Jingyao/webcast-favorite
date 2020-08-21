@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>直播间收藏平台</title>
+    <script th:inline="javascript">
+        function postDeleteId(id) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("post", "/favorites/delete", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("id="+id);
+            xhttp.onreadystatechange = function () {
+                /* 这步为判断服务器是否正确响应
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    alert(xhttp.responseText);
+                }*/
+            location.reload();
+            };
+        }
+        function changeTable(id) {
+            var b = document.getElementById(id)
+            var aRow = b.parentElement.parentElement;
+            aRow.setAttribute("contenteditable", "true");
+            b.setAttribute("value", "提交");
+            b.setAttribute("onclick", "updateRow(this.id)");
+        }
+        function updateRow(id) {
+            var b = document.getElementById(id)
+            var aRow = b.parentElement.parentElement;
+            var xhttp = new XMLHttpRequest();
+            var text = "id=" + aRow.getElementsByClassName("id")[0].innerText
+                + "&platform=" + aRow.getElementsByClassName("platform")[0].innerText
+                + "&classification=" + aRow.getElementsByClassName("classification")[0].innerText
+                + "&name=" + aRow.getElementsByClassName("name")[0].innerText
+                + "&url=" + aRow.getElementsByClassName("url")[0].innerText;
+            xhttp.open("post", "/favorites/update", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send(text);
+            xhttp.onreadystatechange = function () {
+                /* 这步为判断服务器是否正确响应
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    alert(xhttp.responseText);
+                }*/
+                location.reload();
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <p th:text="'欢迎你'+${user.user_id}"></p>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/user/logout">退出</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="wrapper">
+            <div class="heading">
+                <h3>
+                    直播间收藏平台
+                </h3>
+            </div>
+            <div class="search">
+                <form action="/favorites/find" method="get">
+                    <input type="text" name="keyword" placeholder="输入想要查询的直播间名称">
+                    <input type="submit" value="查询">
+                </form>
+            </div>
+            <div class="add">
+                <form action="/favorites/add" method="post">
+<!--                    改成下拉+输入式, 加格式检查-->
+                    <input type="text" name="platform" placeholder="平台" list="platformList">
+                    <datalist id="platformList" style="display: none">
+                        <option value="哔哩哔哩">哔哩哔哩</option>
+                        <option value="虎牙">虎牙</option>
+                        <option value="斗鱼">斗鱼</option>
+                        <option value="斗鱼">快手</option>
+                        <option value="斗鱼">触手TV</option>
+                    </datalist>
+                    <input type="text" name="classification" placeholder="类型">
+                    <input type="text" name="name" placeholder="主播名称">
+                    <input type="text" name="url" placeholder="url">
+                    <input type="submit" name="add_button" value="添加收藏">
+                </form>
+            </div>
+            <div>
+                <table id="favorite_list">
+                    <tr style='width:300px'>
+                        <td>直播平台</td>
+                        <td>直播类型</td>
+                        <td>主播名称</td>
+                        <td>URL</td>
+                        <td></td><td></td>
+                    </tr>
+                    <tr th:each='favorite : ${favoriteList}' style='width:300px'>
+                        <!--/*@thymesVar id="favorite" type="com.liujingyao.favorites.entity.Favorite"*/-->
+                        <td th:text='${favorite.favorite_id}' class="id" hidden="true"></td>
+                        <td th:text='${favorite.platform}' class="platform"></td>
+                        <td th:text='${favorite.classification }' class="classification"></td>
+                        <td th:text='${favorite.name}' class="name"></td>
+                        <td th:text='${favorite.url}' class="url"></td>
+                        <td><input type="button" value="修改" th:id="'u'+${favorite.favorite_id}" onclick="changeTable(this.id)" /></td>
+                        <td><input type="button" value="删除" th:id='${favorite.favorite_id}' onclick="postDeleteId(this.id)" /></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="footing"></div>
+    </div>
+</body>
+</html>
